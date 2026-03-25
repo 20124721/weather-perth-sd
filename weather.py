@@ -12,6 +12,8 @@ def mean(in_series):
         return None
     return sum(values) / len(values)
 
+
+
 def variance(in_series):
     pass
 
