@@ -1,4 +1,5 @@
 from datetime import date
+import math
 
 series_titles = [
     "Maximum temperature (Degree C)",
@@ -6,19 +7,24 @@ series_titles = [
     "Rainfall amount (millimetres)",
     "Temperature range (Degree C)"
 ]
+
 def mean(in_series):
-    values = [v for v in in_series if v is not None]
-    if len(values) == 0:
-        return None
-    return sum(values) / len(values)
-
-
+    valid_values = [value for value in in_series if value is not None]
+    if len(valid_values) == 0:
+        return 0
+    return sum(valid_values) / len(valid_values)
 
 def variance(in_series):
-    pass
+    valid_values = [value for value in in_series if value is not None]
+    if len(valid_values) == 0:
+        return 0
+
+    avg = mean(valid_values)
+    squared_differences = [(value - avg) ** 2 for value in valid_values]
+    return sum(squared_differences) / len(valid_values)
 
 def standard_deviation(in_series):
-    pass
+    return math.sqrt(variance(in_series))
 
 def filter_series(year_series, month_series, day_series, data_series, max_date=None, min_date=None):
     filtered_data = []
@@ -42,15 +48,11 @@ def add_temperature_range(data_table):
 
     temp_range_series = []
     for max_temp, min_temp in zip(max_series, min_series):
-        if max_temp is None or min_temp is None:
-            temp_range_series.append(None)
-        else:
-            temp_range_series.append(max_temp - min_temp)
+        temp_range_series.append(max_temp - min_temp)
 
     data_table["Temperature range (Degree C)"] = temp_range_series
-    return data_table
 
-def read_csv(file,default_value=None):
+def read_csv(file, default_value=None):
     data_table = {}
     with open(file) as f:
         lines = f.readlines()
@@ -73,16 +75,31 @@ def get_user_choice(options):
 
 def menu(data_table):
     while True:
-        print("\nSelect a data series:")
+        print("Select a data series:")
         choice = get_user_choice(series_titles)
 
         if choice is None:
-            print("Exiting program.")
+            print("Goodbye!")
             break
 
-        print(f"Mean: {mean(data_table[choice])}")
+        print("Choose a calculation:")
+        calculation = get_user_choice(["Mean", "Variance", "Standard Deviation"])
+
+        if calculation is None:
+            print("Goodbye!")
+            break
+
+        series = data_table[choice]
+
+        if calculation == "Mean":
+            print(f"Mean: {mean(series)}")
+        elif calculation == "Variance":
+            print(f"Variance: {variance(series)}")
+        elif calculation == "Standard Deviation":
+            print(f"Standard Deviation: {standard_deviation(series)}")
 
 if __name__ == "__main__":
     data = read_csv('weather.csv')
-    data = add_temperature_range(data)
+    add_temperature_range(data)
     menu(data)
+    #yes
